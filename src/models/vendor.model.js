@@ -14,10 +14,6 @@ const VendorSchema = new Schema(
       type: String,
       requiref: true,
     },
-    storeDescription: {
-      type: String,
-      requiref: true,
-    },
     products: [
       {
         type: Schema.Types.ObjectId,
@@ -43,6 +39,6 @@ const VendorSchema = new Schema(
   { timestamps: true }
 );
 
-const Vendor = models.vendors || model("vendors", VenderSchema);
+const Vendor = models.vendors || model("vendors", VendorSchema);
 
 export { Vendor };
