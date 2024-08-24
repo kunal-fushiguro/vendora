@@ -41,8 +41,7 @@ const UserSchema = new Schema(
     },
     orders: [
       {
-        type: Schema.Types.ObjectId,
-        ref: "orders",
+        orderid: { type: Schema.Types.ObjectId, ref: "orders" },
       },
     ],
   },
