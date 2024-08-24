@@ -30,7 +30,11 @@ export async function GET() {
     }
 
     // find vendor
-    const vendor = await Vendor.findOne({ userId: user._id });
+    const vendor = await Vendor.findOne({ userId: user._id }).populate([
+      "orders",
+      "products",
+      "reviews",
+    ]);
     if (!vendor) {
       return NextResponse.json(
         new ApiReponse(400, "Vendor not found.", {}, false),

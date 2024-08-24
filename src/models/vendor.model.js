@@ -16,14 +16,12 @@ const VendorSchema = new Schema(
     },
     products: [
       {
-        type: Schema.Types.ObjectId,
-        ref: "products",
+        productId: { type: Schema.Types.ObjectId, ref: "products" },
       },
     ],
     orders: [
       {
-        type: Schema.Types.ObjectId,
-        ref: "orders",
+        orderId: { type: Schema.Types.ObjectId, ref: "orders" },
       },
     ],
     ratings: {
@@ -31,8 +29,7 @@ const VendorSchema = new Schema(
     },
     reviews: [
       {
-        type: Schema.Types.ObjectId,
-        ref: "reviews",
+        reviewId: { type: Schema.Types.ObjectId, ref: "reviews" },
       },
     ],
   },
