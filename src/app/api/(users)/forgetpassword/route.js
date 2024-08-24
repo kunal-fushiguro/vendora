@@ -1,9 +1,10 @@
 import { dbConnect } from "@/database";
-import { ApiReponse } from "@/utils/ApiResponse";
 import { User } from "@/models/user.model";
+import { ApiReponse } from "@/utils/ApiResponse";
+import { hashPassword } from "@/utils/hashPassword";
 import { NextResponse } from "next/server";
 
-export async function PATCH(request) {
+export async function POST(request) {
   const cookie = await request.headers.get("cookie");
   const gettoken = cookie.split("usertoken=");
   const token = gettoken[1].trim();
@@ -11,12 +12,12 @@ export async function PATCH(request) {
   const { userId } = data;
 
   const body = await request.json();
-  const { profilepic } = body;
+  const { otp, password } = body;
 
-  if (!profilepic) {
+  if (!otp || !password) {
     const response = new ApiReponse(
       400,
-      "profile picture url is required.",
+      "OTP and password is required.",
       {},
       false
     );
@@ -44,30 +45,30 @@ export async function PATCH(request) {
       return NextResponse.json(response, { status: 400 });
     }
 
-    //   update user profile
+    //  check otp
+    if (!(user.verificationCode === Number(otp))) {
+      const response = new ApiReponse(400, "Invalid OTP", {}, false);
+      return NextResponse.json(response, { status: 400 });
+    }
 
-    const updatedUser = await User.findByIdAndUpdate(user._id, {
-      profilepic: profilepic,
-    });
-    return NextResponse.json(
-      new ApiReponse(
-        200,
-        "User profile updated SuccessFully.",
-        {
-          email: updatedUser.email,
-          username: updatedUser.username,
-          isVerified: updatedUser.isVerified,
-          role: updatedUser.role,
-          profilePic: updatedUser.profilePic,
-          address: updatedUser.address,
-          orders: updatedUser.orders,
-        },
-        true
-      ),
-      {
-        status: 200,
+    // check otp is expired or not and then update
+    if (user.verificationCode === Number(otp)) {
+      if (user.verificationCodeExpiry > Date.now()) {
+        // update new password
+        const newPassword = await hashPassword(password);
+        await User.findByIdAndUpdate(userId, { password: newPassword });
+        const response = new ApiReponse(
+          200,
+          "Password has been reset successfully.",
+          {},
+          true
+        );
+        return NextResponse.json(response, { status: 200 });
+      } else {
+        const response = new ApiReponse(400, "OTP expired", {}, true);
+        return NextResponse.json(response, { status: 400 });
       }
-    );
+    }
   } catch (error) {
     console.error(error);
     const response = new ApiReponse(
